@@ -4,6 +4,8 @@ var bodyParser = require('body-parser');
 var path = require('path');
 var cors = require('cors');
 var app = express();
+
+
 var task = require('./server/routes/task.router');
 var config = require('./server/config/database');
 
@@ -17,14 +19,15 @@ mongoose.connect(config.uri, (err) =>{
     }
 });
 
-app.use(express.static(path.join(__dirname,'src')));
+app.use(express.static(path.join(__dirname,'dist')));
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:false}));
 
-app.use('/api',task);
+
+app.use('/api', task);
 app.get('*', function(req,res){
-    res.sendFile('index.html');
+    res.sendfile('dist/index.html');
 });
 
 app.listen(port, function(){

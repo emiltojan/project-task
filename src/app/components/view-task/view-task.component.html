@@ -1,0 +1,171 @@
+<form novalidate [formGroup]="form">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <div class="form-group row">
+                    <label for="task" class="col-sm-3 col-form-label">Task:</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" formControlName="task" id="task">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-md-6">
+                    <div class="form-group row">
+                        <label for="parentTask" class="col-sm-3 col-form-label">Parent Task:</label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" formControlName="parentTask" id="parentTask">
+                        </div>
+                    </div>
+            </div>
+            <div class = "form-group row">
+                <div class ="form-group col-sm-3">
+                    <div class = "form-group row">
+                        <label for = "priorityFrom" class="col-sm-5 col-form-label">
+                            Priority From:
+                        </label>
+                        <div class = "col-sm-4">
+                            <input type="number" class="form-control" formControlName="priorityFrom" id="priorityFrom">
+                        </div>
+                    </div>
+                </div>
+                <div class ="form-group col-sm-3">
+                    <div class = "form-group row">
+                        <label for = "priorityTo" class="col-sm-5 col-form-label">
+                            Priority To:
+                        </label>
+                        <div class = "col-sm-4">
+                            <input type="number" class="form-control" formControlName="priorityTo" id="priorityTo">
+                        </div>
+                    </div>
+                </div>
+                <div class ="form-group col-md-3">
+                    <div class = "form-group row">
+                        <label for = "start_date" class="col-sm-4 col-form-label">
+                            Start Date:
+                        </label>
+                        <div class = "col-sm-6">
+                            <input type="text" class="form-control" formControlName="start_date"  
+                              (focus)="start_date.open()" ngbDatepicker #start_date="ngbDatepicker" id="start_date">
+                        </div>
+                    </div>
+                </div>
+                <div class ="form-group col-md-3">
+                        <div class = "form-group row">
+                            <label for = "end_date" class="col-sm-4 col-form-label">
+                                End Date:
+                            </label>
+                            <div class = "col-sm-6">
+                                <input type="text" class="form-control" formControlName="end_date"  
+                                  (focus)="end_date.open()" ngbDatepicker #end_date="ngbDatepicker" id="end_date">
+                            </div>
+                        </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-3 offset-sm-3">
+                  <button class="btn btn-primary" (click)="search(form.value)">Search</button>
+                </div>
+                <div class="col-sm-3 offset-sm-3">
+                  <button class="btn btn-primary" type="submit" (click)="reset()">Reset</button>
+                </div>
+            </div>
+        </div>
+      </form>
+        
+      <hr/> 
+      <br/>
+        
+<div class="table-responsive">
+   <div *ngIf="tasks?.length;else no_data_templ"> 
+    <table class = "table">
+        <tr *ngFor="let task of tasks">
+            <td id="taskCell">
+                <b>Task</b>
+                <br/>{{task.task}}         
+            </td>
+            <td id="parentTaskCell">
+                <b>Parent Task</b>
+                <br/>{{task.parentTask | findTaskById:tasks}}         
+            </td>
+            <td id="priorityCell">
+                <b>Priority</b>
+                <br/>{{task.priority}}         
+            </td>
+            <td id="dateCell">
+                <b>Start Date</b>
+                <br/>{{task.start_date | date:"dd-MMM-yyyy" }}         
+            </td>
+            <td id="dateCell">
+                <b>End Date</b>
+                <br/>{{task.end_date | date:"dd-MMM-yyyy"}}         
+            </td>
+            <td id="statusCell">
+                <b>Status</b>
+                <br/>{{task.taskStatus | pTaskStatus}}         
+            </td>
+            <td class="task-btn">
+                <button type="button" class="btn btn-outline-primary" [disabled] ="task.taskStatus" (click)="editTask(task)" data-toggle="modal" data-target="#editTaskModal">
+                    Edit
+                  </button>
+            </td>
+            <td class="task-btn">
+                <button class = "btn btn-outline-primary" [disabled] ="task.taskStatus" (click)="endTask(task)">End Task</button>
+            </td>
+            <td class="task-btn">
+                    <button class = "btn btn-outline-primary" [disabled] ="!task.taskStatus" (click)="delTask(task._id)">Delete</button>
+            </td>
+        </tr>
+    </table>
+  </div> 
+</div>
+
+<ng-template #no_data_templ>
+        No data found
+</ng-template>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group row">
+                <label for="task" class="col-sm-3 col-form-label">Task</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" value="{{upd_task}}" id="task" [(ngModel)] = "updTasks.task"> 
+                </div>
+            </div>
+            <div class="form-group row">
+                    <label for="priority" class="col-sm-3 col-form-label">Priority</label>
+                        <label class="col-sm-1 col-form-label">0</label>
+                    <div class="col-sm-5">
+                      <input type="range" class="form-control" #priority id="priority" min="0" max="30" [(ngModel)] = "updTasks.priority"> 
+                    </div>
+                    <label class="col-sm-1 col-form-label">30</label>
+                    <label for="priority" class="col-sm-1 offset-sm-1 col-form-label">{{updTasks.priority || upd_priority}}</label>
+            </div>
+           <div class="form-group row">
+                    <label for="start_date" class="col-sm-3 col-form-label">Start Date</label>
+                    <div class="col-sm-9">
+                      <input type="text" class="form-control" (focus)="start_date.open()" ngbDatepicker 
+                          #start_date="ngbDatepicker" id="start_date" value="{{upd_start_date}}" [(ngModel)] = "updTasks.start_date">
+                    </div>
+            </div>
+            <div class="form-group row">
+                    <label for="end_date" class="col-sm-3 col-form-label">End Date</label>
+                    <div class="col-sm-9">
+                      <input type="text" class="form-control" (focus)="end_date.open()" ngbDatepicker #end_date="ngbDatepicker" 
+                        id="end_date" value="{{upd_end_date}}" [(ngModel)] = "updTasks.end_date">
+                    </div>
+           </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" (click)="updTask(updTasks)" >Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
